@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title>Test Quiz</title>
+		<script src="lib/choices.js/assets/scripts/dist/choices.js" type="text/javascript"></script>
+		<script src="lib/jspsych/jspsych.js" type="text/javascript"></script>
+        <script src="src/jspsych-dropdown.js" type="text/javascript"></script>
+
+		<link rel="stylesheet" href="lib/choices.js/assets/styles/css/choices.min.css">
+		<link href="lib/jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+     </head>
+	<body>
+		<div id='jspsychTarget'></div>
+	</body>
+	<script>
+	var test_dropdown = {
+		type: "dropdown",
+        questions: [
+			'What is your age?',
+			'What are your favorite colors?'
+		],
+        options: [
+			['< 18', '18-25', '26-40', '41-60', '> 60'],
+			['white', 'black', 'green', 'blue', 'yellow', 'red', 'orange']
+		],
+        select_multiple: [false, true],
+		required: [true, true]
+	};
+
+	var timeline = [];
+	timeline.push(test_dropdown);
+
+    jsPsych.init({
+      display_element: document.getElementById('jspsychTarget'),
+      timeline: timeline
+    });
+	</script>
+</html>
