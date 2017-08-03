@@ -13,17 +13,22 @@
 	</body>
 	<script>
 	var test_dropdown = {
-		type: "dropdown",
+		type: 'dropdown',
         questions: [
-			'What is your age?',
-			'What are your favorite colors?'
+			{
+				text: 'What is your age?',
+				options: ['< 18', '18-25', '26-40', '41-60', '> 60'],
+				allowMultipleSelections: false,
+				required: true
+			},
+			{
+				text: 'What are your favorite colors?',
+				options: ['white', 'black', 'green', 'blue', 'yellow', 'red', 'orange'],
+				allowMultipleSelections: true,
+				required: true
+			}
 		],
-        options: [
-			['< 18', '18-25', '26-40', '41-60', '> 60'],
-			['white', 'black', 'green', 'blue', 'yellow', 'red', 'orange']
-		],
-        select_multiple: [false, true],
-		required: [true, true]
+		preamble: 'This is an introductory test to demographics questions'
 	};
 
 	var timeline = [];

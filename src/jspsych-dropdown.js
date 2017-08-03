@@ -1,6 +1,7 @@
 /**
  * jspsych-dropdown
- *
+ * A plugin displaying multiple-choice questions. Choices are shown in dropdowns.
+ * Supports selecting multiple choices for a question.
  * Based on jspsych-survey-multi-choice:
  * a jspsych plugin for multiple choice survey questions
  *
@@ -17,45 +18,39 @@ jsPsych.plugins['dropdown'] = (function () {
 		name: 'dropdown',
 		description: '',
 		parameters: {
-			select_multiple: {
-				type: [jsPsych.plugins.parameterType.BOOL],
-				array: true,
-				default: false,
-				no_function: false,
-				description: 'Whether multiple choices can be selected'
-			},
-			questions: {
-				type: [jsPsych.plugins.parameterType.STRING],
-				array: true,
-				default: undefined,
-				no_function: false,
-				description: ''
-			},
-			options: {
-				type: [jsPsych.plugins.parameterType.STRING],
-				array: true,
-				default: undefined,
-				no_function: false,
-				description: ''
-			},
-			required: {
-				type: [jsPsych.plugins.parameterType.BOOL],
-				array: true,
-				default: false,
-				no_function: false,
-				description: ''
-			},
 			preamble: {
-				type: [jsPsych.plugins.parameterType.STRING],
-				default: '',
-				no_function: false,
-				description: ''
+				type: jsPsych.plugins.parameterType.STRING,
+				description: 'Introductory text to display above all questions.',
+				default: ''
 			},
 			superq: {
-				type: [jsPsych.plugins.parameterType.STRING],
-				default: '',
-				no_function: false,
-				description: ''
+				type: jsPsych.plugins.parameterType.STRING,
+				description: 'A group name for the questions'
+			},
+			questions: {
+				type: jsPsych.plugins.parameterType.COMPLEX,
+				array: true,
+				nested: {
+					text: {
+						type: jsPsych.plugins.parameterType.STRING,
+						description: 'Question text'
+					},
+					allowMultipleSelections: {
+						type: jsPsych.plugins.parameterType.BOOL,
+						description: 'Whether to allow multiple choices to be selected',
+						default: false
+					},
+					required: {
+						type: jsPsych.plugins.parameterType.BOOL,
+						description: 'Whether an option must be selected for the question',
+						default: false
+					},
+					options: {
+						type: jsPsych.plugins.parameterType.STRING,
+						array: true,
+						description: 'An array of possible choices'
+					}
+				}
 			}
 		}
 	}
@@ -68,12 +63,12 @@ jsPsych.plugins['dropdown'] = (function () {
 		}
 
 		// trial defaults
-		trial.preamble = typeof trial.preamble == 'undefined' ? "" : trial.preamble;
-		trial.superq = typeof trial.superq == 'undefined' ? false : trial.superq;
-		trial.required = typeof trial.required == 'undefined' ? [] : trial.required;
-		trial.select_multiple = typeof trial.select_multiple === 'undefined'? [] : trial.select_multiple;
-
-		// inject CSS for trial
+		trial.preamble = typeof trial.preamble == 'undefined' ? '' : trial.preamble;
+		trial.superq = typeof trial.superq == 'undefined' ? '' : trial.superq;
+		trial.questions.forEach(function (question) {
+			question.required = question.required === true;
+			question.allowMultipleSelections = question.allowMultipleSelections === true;
+		});
 
 		// form element
 		var trial_form_id = _join(plugin_id_name, "form");
@@ -95,17 +90,18 @@ jsPsych.plugins['dropdown'] = (function () {
 		}
 
 		function initChoicesForQuestion(questionIdx) {
+			var question = trial.questions[questionIdx];
 			var question_choices_selector = '#' + buildQuestionChoicesId(questionIdx);
 			var choicesConfig = {
 					shouldSort: false, // disable alphabetic sort, options should remain in the same order as in the trial parameter
-					choices: trial.options[questionIdx].map(function (optionText) {
+					choices: question.options.map(function (optionText) {
 						return {
 							label: optionText,
 							value: optionText
 						};
 					})
 			};
-			if (trial.select_multiple[questionIdx]) {
+			if (question.allowMultipleSelections) {
 				// add the placeholder for multiple selection questions in the Choices config
 				// single-select questions are handled in the html directly because otherwise the answer is preselected
 				choicesConfig.placeholder = true;
@@ -120,20 +116,23 @@ jsPsych.plugins['dropdown'] = (function () {
 			// create question container
 			// ID of the html element that will contain all choices for the current question
 			var choices_id = buildQuestionChoicesId(i);
-			var selection_type = trial.select_multiple[i] ? ' multiple' : '';
-			var placeholder_text = 'Please choose an answer';
-			var placeholder_html;
-			if (trial.select_multiple[i]) {
+			var question = trial.questions[i];
+			var selectionType = question.allowMultipleSelections ? ' multiple' : '';
+			var placeholderText = 'Please choose an answer';
+			var placeholderHtml;
+			if (question.allowMultipleSelections) {
 				// placeholders for multiple select questions are set in the Choices configuration
-				placeholder_html = '';
+				placeholderHtml = '';
 			} else {
-				placeholder_html = '<option selected disabled value="">' + placeholder_text + '</option>';
+				placeholderHtml = '<option selected disabled value="">' + placeholderText + '</option>';
 			}
-			var is_required = trial.required[i]? ' required': '';
-			var select_html = '<select id="' + choices_id + '" name="' + choices_id + '"' + selection_type + is_required + '>' +
-			placeholder_html + '</select>';
-			trial_form.innerHTML += '<div><p class="' + plugin_id_name + '-text dropdown">' + trial.questions[i] + '</p>' + select_html + '</div>';
+			var isRequired = question.required? ' required': '';
+			var selectHtml = '<select id="' + choices_id + '" name="' + choices_id + '"' + selectionType + isRequired + '>' +
+			placeholderHtml + '</select>';
+			trial_form.innerHTML += '<div><p class="' + plugin_id_name + '-text dropdown">' + question.text + '</p>' + selectHtml + '</div>';
 
+			// wait until innerHTML is actually loaded into the DOM, only after that invoke Choices
+			// otherwise Choices can't find the proper DOM elements by ID
 			setTimeout(initChoicesForQuestion.bind(null, i));
 		}
 		// add submit button
