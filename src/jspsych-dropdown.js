@@ -49,6 +49,10 @@ jsPsych.plugins['dropdown'] = (function () {
 						type: jsPsych.plugins.parameterType.STRING,
 						array: true,
 						description: 'An array of possible choices'
+					},
+					placeholder: {
+						type: jsPsych.plugins.parameterType.STRING,
+						description: 'Optional text to use as a placeholder'
 					}
 				}
 			}
@@ -105,7 +109,7 @@ jsPsych.plugins['dropdown'] = (function () {
 				// add the placeholder for multiple selection questions in the Choices config
 				// single-select questions are handled in the html directly because otherwise the answer is preselected
 				choicesConfig.placeholder = true;
-				choicesConfig.placeholderValue = 'Select option';
+				choicesConfig.placeholderValue = question.placeholder || 'Select option';
 			}
 			var question_choices = new Choices(question_choices_selector, choicesConfig);
 			all_choice_objects[questionIdx] = question_choices;
@@ -118,7 +122,7 @@ jsPsych.plugins['dropdown'] = (function () {
 			var choices_id = buildQuestionChoicesId(i);
 			var question = trial.questions[i];
 			var selectionType = question.allowMultipleSelections ? ' multiple' : '';
-			var placeholderText = 'Please choose an answer';
+			var placeholderText = question.placeholder || 'Please choose an answer';
 			var placeholderHtml;
 			if (question.allowMultipleSelections) {
 				// placeholders for multiple select questions are set in the Choices configuration
