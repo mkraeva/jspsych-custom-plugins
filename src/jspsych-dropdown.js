@@ -1,14 +1,10 @@
 /**
  * jspsych-dropdown
- * A plugin displaying multiple-choice questions. Choices are shown in dropdowns.
- * Supports selecting multiple choices for a question.
+ * A plugin displaying multiple-choice questions. Choices are shown in dropdowns,
+ * using the Choices.js library. Supports selecting multiple choices for a question.
+
  * Based on jspsych-survey-multi-choice:
- * a jspsych plugin for multiple choice survey questions
- *
- * Shane Martin
- *
- * documentation: docs.jspsych.org
- *
+ * a jspsych plugin for multiple choice survey questions, by Shane Martin
  */
 
 jsPsych.plugins['dropdown'] = (function () {
@@ -97,13 +93,13 @@ jsPsych.plugins['dropdown'] = (function () {
 			var question = trial.questions[questionIdx];
 			var question_choices_selector = '#' + buildQuestionChoicesId(questionIdx);
 			var choicesConfig = {
-					shouldSort: false, // disable alphabetic sort, options should remain in the same order as in the trial parameter
-					choices: question.options.map(function (optionText) {
-						return {
-							label: optionText,
-							value: optionText
-						};
-					})
+				shouldSort: false, // disable alphabetic sort, options should remain in the same order as in the trial parameter
+				choices: question.options.map(function (optionText) {
+					return {
+						label: optionText,
+						value: optionText
+					};
+				})
 			};
 			if (question.allowMultipleSelections) {
 				// add the placeholder for multiple selection questions in the Choices config
@@ -163,6 +159,7 @@ jsPsych.plugins['dropdown'] = (function () {
 				"rt": response_time,
 				"preamble": trial.preamble,
 				"superq": trial.superq,
+				"rawResponses": question_data,
 				"responses": JSON.stringify(question_data)
 			};
 			// next trial
