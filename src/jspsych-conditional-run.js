@@ -24,7 +24,9 @@ jsPsych.plugins['conditional-run'] = (function () {
 	}
 	plugin.trial = function (display_element, trial) {
 		if (typeof trial.conditionalFunction === 'function' && trial.conditionalFunction()) {
-			jsPsych.plugins[trial.dependentPluginParameters.type].trial(display_element, trial.dependentPluginParameters);
+			// protect functions in the parameters (only does a shallow copy)
+			var dependentPluginParams = Object.assign({}, trial.dependentPluginParameters);
+			jsPsych.plugins[dependentPluginParams.type].trial(display_element, dependentPluginParams);
 		} else {
 			// skip
 			jsPsych.finishTrial();
